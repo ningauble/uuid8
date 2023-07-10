@@ -36,5 +36,4 @@ def uuid8():
     return '%s-%s-%s-%s-%s' % (part1[:8], part1[8:12], part1[12:], part2[:4], part2[4:])
 
 if __name__ == '__main__':
-    for x in range(0, 270000):
-        uuid8()
+    print(uuid8())
