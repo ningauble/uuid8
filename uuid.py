@@ -7,12 +7,10 @@ Based on https://www.ietf.org/archive/id/draft-peabody-dispatch-new-uuid-format-
 '''
 def uuid8():
     
-    ts, ms = str(time.time()).split(".")
+    ts, ns = divmod(time.time_ns(), 1_000_000_000)
     
-    ts = int(ts)
-    
-    # make 28 bits of milliseconds with a possible little loss of precision on decode
-    ms = round(float("0." + ms) * 0xfffffff)
+    # make 28 bits of nanoseconds with a possible little loss of precision on decode
+    ms = (ns >> 2) & 0xfffffff
     
     part1 = ts << 32
     
@@ -35,9 +33,8 @@ def uuid8():
     part1 = str('{0:x}'.format(part1))
     part2 = str('{0:x}'.format(part2))
     
-    uuidv8 = part1 + part2
-    
-    return '%s-%s-%s-%s-%s' % (uuidv8[:8], uuidv8[8:12], uuidv8[12:16], uuidv8[16:20], uuidv8[20:])
+    return '%s-%s-%s-%s-%s' % (part1[:8], part1[8:12], part1[12:], part2[:4], part2[4:])
 
 if __name__ == '__main__':
-    print(uuid8())
+    for x in range(0, 270000):
+        uuid8()
