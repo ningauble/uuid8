@@ -12,28 +12,33 @@ def uuid8():
     # make 28 bits of nanoseconds with a possible little loss of precision on decode
     ms = (ns >> 2) & 0xfffffff
     
-    part1 = ts << 32
+    # some randoms for later bit operations
+    rnd1 = random.randint(0, 0x0fff)
+    rnd2 = random.randint(0, 0xffffffff)
+    rnd3 = random.randint(0, 0xffff)
+    
+    bits = ts << 96
     
     # use first 16 bits of milliseconds
-    part1 = part1 | ( (ms >> 12) << 16 )
+    bits = bits | ( (ms >> 12) << 80 )
     
     # ver 8, yes
-    part1 = part1 | (8 << 12)
+    bits = bits | (8 << 76)
     
     # use last 12 bits of milliseconds
-    part1 = part1 | ( ms & 0xfff )
+    bits = bits | ( ( ms & 0xfff ) << 64 )
     
     # ietf draft says var should be 0b10
-    part2 = (random.randint( 0, 0x0fff ) | 0x2000) << 48
+    # other bits is random
+    bits = bits | (rnd1 | 0x2000) << 48
     
-    # mighty random
-    part2  = part2 | (random.randint(0, 0xffffffff) << 16)
-    part2  = part2 | random.randint(0, 0xffff)
+    # mighty random fill
+    bits  = bits | (rnd2 << 16)
+    bits  = bits | rnd3
     
-    part1 = str('{0:x}'.format(part1))
-    part2 = str('{0:x}'.format(part2))
+    bits = str('{0:x}'.format(bits))
     
-    return '%s-%s-%s-%s-%s' % (part1[:8], part1[8:12], part1[12:], part2[:4], part2[4:])
+    return '%s-%s-%s-%s-%s' % (bits[:8], bits[8:12], bits[12:16], bits[16:20], bits[20:])
 
 if __name__ == '__main__':
     print(uuid8())
